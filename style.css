@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans&display=swap");
+
+html {
+  background-color: rgb(120, 70, 200);
+  font-family: "DM Sans", sans-serif;
+}
+
+h1 {
+  color: white;
+}
+
+.container {
+  margin: auto;
+  width: 50%;
+  text-align: center;
+}
+
+#logo {
+  width: 100px;
+}
+
+.vrfContainer {
+  padding: 100px 0 100px 0;
+}
+
+button {
+  background-color: #0049af;
+  padding: 20px 10px 20px 10px;
+  border: 1px #fff;
+  border-radius: 5px;
+  color: #fff;
+  font-size: medium;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.display {
+  padding: 40px 0 40px 0;
+  color: white;
+  font-size: 20px;
+  word-wrap: break-word;
+}

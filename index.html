@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <title>Commit Reveal Randomness</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <div class="container">
+    <div class="vrfContainer">
+      <h1>Commit Reveal Randomness Demo</h1>
+      <button onClick="generatePreimage()">1a. Generate Preimage</button>
+      <div class="display" id="preimage">-----</div>
+      <button onClick="hashPreimage()">1b. Hash Preimage</button>
+      <div class="display" id="preimageHash">-----</div>
+      <button onClick="commitHash()">2. Commit Hash</button>
+      <div class="display" id="commitTx">-----</div>
+      <button onClick="revealPreimage()">3. Reveal Preimage</button>
+      <div class="display" id="revealTx">-----</div>
+      <button onClick="getRandomNumber()">4. Get Random Number</button>
+      <div class="display" id="randomNumber">-----</div>
+    </div>
+    <script src="https://gist.github.com/leon-do/aad225fdd3ff3143ab733034e4ce60a4.js"></script>
+    <a href="https://github.com/leon-do/commit-reveal-randomness">Github</a>
+  </div>
+</html>
+
+<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+<script>
+  const provider = new ethers.providers.JsonRpcProvider("https://matic-mumbai.chainstacklabs.com");
+  const contractAddress = "0x27F389F3A00FdF46F73E3Bc69E3202F72b031C08";
+  // prettier-ignore
+  const abi = [{"inputs":[],"name":"blockNumber","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_commitHash","type":"bytes32"}],"name":"commit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"commitHash","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_preimage","type":"bytes32"}],"name":"hashPreimage","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"randomNumber","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_preimage","type":"bytes32"}],"name":"reveal","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+  const contract = new ethers.Contract(contractAddress, abi, provider);
+  let preimage;
+  let preimageHash;
+
+  async function generatePreimage() {
+    // generate a bytes32 preimage
+    const bytes32 = ethers.utils.randomBytes(32);
+    preimage = ethers.utils.hexlify(bytes32);
+    document.getElementById("preimage").innerHTML = preimage;
+  }
+
+  async function hashPreimage() {
+    // hash the preimage
+    preimageHash = await contract.hashPreimage(preimage);
+    document.getElementById("preimageHash").innerHTML = preimageHash;
+  }
+
+  async function commitHash() {
+    // connect to wallet
+    const walletProvider = new ethers.providers.Web3Provider(web3.currentProvider);
+    await walletProvider.send("eth_requestAccounts", []);
+    const signer = walletProvider.getSigner();
+    if ((await signer.getChainId()) !== 80001) {
+      alert("Please connect to Matic Mumbai Testnet");
+      return;
+    }
+    // commit the hash
+    const contractWithSigner = contract.connect(signer);
+    const tx = await contractWithSigner.commit(preimageHash);
+    document.getElementById("commitTx").innerHTML = "https://mumbai.polygonscan.com/tx/" + tx.hash;
+  }
+
+  async function revealPreimage() {
+    // connect to wallet
+    const walletProvider = new ethers.providers.Web3Provider(web3.currentProvider);
+    await walletProvider.send("eth_requestAccounts", []);
+    const signer = walletProvider.getSigner();
+    if ((await signer.getChainId()) !== 80001) {
+      alert("Please connect to Matic Mumbai Testnet");
+      return;
+    }
+    // reveal the preimage
+    const contractWithSigner = contract.connect(signer);
+    const tx = await contractWithSigner.reveal(preimage);
+    document.getElementById("revealTx").innerHTML = "https://mumbai.polygonscan.com/tx/" + tx.hash;
+  }
+
+  async function getRandomNumber() {
+    // get the random number
+    const randomNumber = await contract.randomNumber();
+    document.getElementById("randomNumber").innerHTML = randomNumber;
+  }
+</script>
